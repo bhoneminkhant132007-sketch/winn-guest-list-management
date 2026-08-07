@@ -563,32 +563,37 @@
             }
         });
 
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const code = document.getElementById('login-code').value;
-            const role = document.getElementById('login-role').value;
+      document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const code = document.getElementById('login-code').value.trim();
+    const role = document.getElementById('login-role').value;
 
-            if (code === 'WGLM2026') {
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('user-badge').innerText = role.toUpperCase();
-                document.getElementById('profile-email').innerText = email;
-                document.getElementById('profile-role').innerText = role;
+    // Staff အတွက် WGLM2026 နှင့် Admin Manager အတွက် WGLM1977 စစ်ဆေးခြင်း
+    const isValidStaff = (role === 'staff' && code === 'WGLM2026');
+    const isValidAdmin = (role === 'admin' && code === 'WGLM1977');
 
-                populateRooms();
-                fetchGuests();
-                setupRealtime();
-                
-                const now = new Date();
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                document.getElementById('g-checkin').value = now.toISOString().slice(0, 16);
+    if (isValidStaff || isValidAdmin) {
+        document.getElementById('login-error').classList.add('hidden');
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('user-badge').innerText = role === 'admin' ? 'ADMIN MANAGER' : 'STAFF';
+        document.getElementById('profile-email').innerText = email;
+        document.getElementById('profile-role').innerText = role === 'admin' ? 'Admin Manager' : 'Staff';
 
-                window.showPage('home');
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        });
+        populateRooms();
+        fetchGuests();
+        setupRealtime();
+        
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('g-checkin').value = now.toISOString().slice(0, 16);
+
+        window.showPage('home');
+    } else {
+        document.getElementById('login-error').classList.remove('hidden');
+    }
+});
 
         // GLOBAL NAVIGATION & UI HELPER FUNCTIONS
         window.logout = function() {
