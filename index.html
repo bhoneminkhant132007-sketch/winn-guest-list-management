@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WINN Guest House - Guest List Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandNavy: '#0B1B3D',
+                        brandBlue: '#1E3A8A',
+                        brandGold: '#D4AF37',
+                        brandGoldLight: '#F3E5AB',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;700&display=swap');
+        body, button, input, select, textarea, table { 
+            font-family: 'Pyidaungsu', sans-serif !important; 
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page" class="fixed inset-0 z-50 bg-brandNavy flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border-2 border-brandGold w-full max-w-md p-8">
+            <div class="text-center mb-6">
+                <div class="w-24 h-24 bg-brandNavy border-4 border-brandGold rounded-full mx-auto flex flex-col items-center justify-center shadow-lg mb-3">
+                    <span class="text-brandGold font-bold text-3xl tracking-widest leading-none">W</span>
+                    <span class="text-brandGold font-semibold text-xs tracking-wider">WINN</span>
+                </div>
+                <h1 class="text-2xl font-bold text-brandNavy">WINN Guest House</h1>
+                <p class="text-sm text-slate-500 font-semibold">Guest List Management System</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Staff Email</label>
+                    <input type="email" id="login-email" required placeholder="staff@winnguesthouse.com" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brandBlue focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Security Code</label>
+                    <input type="password" id="login-code" required placeholder="Enter Security Code" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brandBlue focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Role</label>
+                    <select id="login-role" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brandBlue focus:outline-none">
+                        <option value="staff">Staff</option>
+                        <option value="admin">Admin Manager</option>
+                    </select>
+                </div>
+                <p id="login-error" class="text-red-500 text-xs hidden">Security Code မှားယွင်းနေပါသည်။ (Default: WGLM2026)</p>
+                <button type="submit" class="w-full bg-brandNavy hover:bg-brandBlue text-brandGold font-bold py-2.5 rounded-lg border border-brandGold transition duration-200">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Log In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD WRAPPER -->
+    <div id="main-app" class="hidden flex-1 flex flex-col">
+        <!-- TOP NAVBAR -->
+        <header class="bg-brandNavy text-white border-b-4 border-brandGold shadow-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-brandNavy border-2 border-brandGold rounded-full flex items-center justify-center font-bold text-brandGold text-lg">
+                        W
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-brandGold tracking-wide">WINN Guest House</h1>
+                        <p class="text-xs text-slate-300">Daik-U, Bago Region</p>
+                    </div>
+                </div>
+                <div class="text-right flex items-center space-x-3">
+                    <span id="db-status" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded font-bold"><i class="fa-solid fa-cloud mr-1"></i> Supabase Syncing</span>
+                    <div>
+                        <h2 class="text-sm md:text-base font-semibold text-brandGoldLight">Guest List Management</h2>
+                        <span id="user-badge" class="inline-block bg-brandGold text-brandNavy text-xs px-2 py-0.5 rounded font-bold">Staff</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVIGATION BAR -->
+        <nav class="bg-brandBlue text-white shadow-inner">
+            <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-1 py-2 text-sm font-semibold">
+                <button onclick="window.showPage('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg hover:bg-brandNavy transition flex items-center space-x-2"><i class="fa-solid fa-chart-line"></i><span>Home</span></button>
+                <button onclick="window.showPage('report')" id="nav-report" class="nav-btn px-4 py-2 rounded-lg hover:bg-brandNavy transition flex items-center space-x-2"><i class="fa-solid fa-user-plus"></i><span>Report Guests</span></button>
+                <button onclick="window.showPage('edit')" id="nav-edit" class="nav-btn px-4 py-2 rounded-lg hover:bg-brandNavy transition flex items-center space-x-2"><i class="fa-solid fa-pen-to-square"></i><span>Edit Guests</span></button>
+                <button onclick="window.showPage('list')" id="nav-list" class="nav-btn px-4 py-2 rounded-lg hover:bg-brandNavy transition flex items-center space-x-2"><i class="fa-solid fa-list-check"></i><span>Guest List</span></button>
+                <button onclick="window.showPage('pdf')" id="nav-pdf" class="nav-btn px-4 py-2 rounded-lg hover:bg-brandNavy transition flex items-center space-x-2"><i class="fa-solid fa-file-pdf"></i><span>Get PDF File</span></button>
+                <button onclick="window.showPage('account')" id="nav-account" class="nav-btn px-4 py-2 rounded-lg hover:bg-brandNavy transition flex items-center space-x-2"><i class="fa-solid fa-user-gear"></i><span>Account</span></button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+            <!-- 1. HOME PAGE -->
+            <section id="page-home" class="page-content space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-brandBlue">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Today's Total Guests</p>
+                        <h3 id="stat-total-guests" class="text-3xl font-extrabold text-brandNavy mt-1">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-emerald-500">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Check-in Guests</p>
+                        <h3 id="stat-checkin-guests" class="text-3xl font-extrabold text-emerald-600 mt-1">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-amber-500">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Check-out Guests</p>
+                        <h3 id="stat-checkout-guests" class="text-3xl font-extrabold text-amber-600 mt-1">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-brandGold">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Occupied Rooms</p>
+                        <h3 id="stat-occupied-rooms" class="text-3xl font-extrabold text-brandNavy mt-1">0 / 24</h3>
+                    </div>
+                </div>
+
+                <!-- Room Grid -->
+                <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                    <h3 class="text-lg font-bold text-brandNavy mb-4 flex items-center"><i class="fa-solid fa-door-open mr-2 text-brandGold"></i> Room Status Indicator (၂၄ အခန်း)</h3>
+                    <div id="room-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
+                </div>
+            </section>
+
+            <!-- 2. REPORT GUESTS PAGE -->
+            <section id="page-report" class="page-content hidden">
+                <div class="bg-white p-6 rounded-xl shadow border border-slate-200 max-w-4xl mx-auto">
+                    <h2 class="text-xl font-bold text-brandNavy mb-6 pb-2 border-b border-slate-200 flex items-center">
+                        <i class="fa-solid fa-user-plus mr-2 text-brandBlue"></i> ဧည့်သည်သစ် စာရင်းသွင်းရန် (Report Guest)
+                    </h2>
+                    <form id="guest-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ဧည့်သည်အမည် (Name) *</label>
+                            <input type="text" id="g-name" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">အဖအမည် (Father Name) *</label>
+                            <input type="text" id="g-father" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">အသက် (Age) *</label>
+                            <input type="number" id="g-age" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ကျား / မ (Gender) *</label>
+                            <select id="g-gender" class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                                <option value="ကျား">ကျား (Male)</option>
+                                <option value="မ">မ (Female)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">မှတ်ပုံတင်အမှတ် (NRC Number) *</label>
+                            <input type="text" id="g-nrc" required placeholder="၁၂/ဒကတ(နိုင်)၀၀၀၀၀၀" class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">လူမျိုး *</label>
+                            <input type="text" id="g-race" required placeholder="ဗမာ" class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ဘာသာ *</label>
+                            <input type="text" id="g-religion" required placeholder="ဗုဒ္ဓ" class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">အခန်းနံပါတ် (Room Number) *</label>
+                            <select id="g-room" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue"></select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">နေရပ်လိပ်စာအပြည့်အစုံ (Address) *</label>
+                            <input type="text" id="g-address" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Check-in Date & Time *</label>
+                            <input type="datetime-local" id="g-checkin" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">အလုပ်အကိုင် (Occupation) *</label>
+                            <input type="text" id="g-occupation" required class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">လာရောက်သည့်နေရာ (From Where)</label>
+                            <input type="text" id="g-from-place" placeholder="e.g. ရန်ကုန်" class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">မှတ်ချက် (Remark)</label>
+                            <input type="text" id="g-remark" class="w-full px-3 py-2 border rounded focus:ring-1 focus:ring-brandBlue">
+                        </div>
+                        <div class="md:col-span-2 text-right mt-4">
+                            <button type="submit" id="btn-save" class="bg-brandBlue text-white px-6 py-2 rounded-lg font-bold hover:bg-brandNavy transition">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Guest
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 3. EDIT GUESTS PAGE -->
+            <section id="page-edit" class="page-content hidden">
+                <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                    <h2 class="text-xl font-bold text-brandNavy mb-4 flex items-center">
+                        <i class="fa-solid fa-pen-to-square mr-2 text-brandBlue"></i> Edit / Check-Out Guests
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="bg-brandNavy text-brandGold font-bold">
+                                    <th class="p-2 border">အခန်း</th>
+                                    <th class="p-2 border">အမည်</th>
+                                    <th class="p-2 border">မှတ်ပုံတင်</th>
+                                    <th class="p-2 border">Check-in</th>
+                                    <th class="p-2 border">Check-out Date & Time</th>
+                                    <th class="p-2 border">Status</th>
+                                    <th class="p-2 border text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edit-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. GUEST LIST PAGE -->
+            <section id="page-list" class="page-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow flex flex-col md:flex-row justify-between items-center gap-3">
+                    <h2 class="text-xl font-bold text-brandNavy"><i class="fa-solid fa-history mr-2 text-brandGold"></i> Previous & Active Guest Records</h2>
+                    <input type="text" id="search-input" onkeyup="window.filterGuests()" placeholder="Search by name, room, NRC..." class="px-4 py-2 border rounded-lg w-full md:w-64">
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-bold">
+                                <th class="p-2 border">စဉ်</th>
+                                <th class="p-2 border">အမည်</th>
+                                <th class="p-2 border">အဘအမည်</th>
+                                <th class="p-2 border">အသက်</th>
+                                <th class="p-2 border">NRC</th>
+                                <th class="p-2 border">အခန်း</th>
+                                <th class="p-2 border">နေရပ်လိပ်စာ</th>
+                                <th class="p-2 border">Check-in</th>
+                                <th class="p-2 border">Check-out</th>
+                                <th class="p-2 border">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guest-list-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5. GET PDF FILE PAGE -->
+            <section id="page-pdf" class="page-content hidden">
+                <div class="bg-white p-8 rounded-xl shadow border border-slate-200 max-w-2xl mx-auto text-center space-y-6">
+                    <div class="text-rose-600 text-5xl"><i class="fa-solid fa-file-pdf"></i></div>
+                    <h2 class="text-2xl font-bold text-brandNavy">Export & Print Today's PDF Reports</h2>
+                    <p class="text-sm text-slate-600">ယနေ့ တည်းခိုသည့် ဧည့်သည်များ စာရင်းကို Legal စာရွက်ဖြင့် Pyidaungsu Font အသုံးပြု၍ Print ထုတ်ရန် (သို့မဟုတ်) PDF ရယူရန်။</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                        <button onclick="window.generatePDF('police')" class="bg-rose-700 hover:bg-rose-800 text-white font-bold py-3 px-4 rounded-lg shadow flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-print"></i>
+                            <span>ရဲစခန်း ဧည့်စာရင်း PDF / Print</span>
+                        </button>
+                        <button onclick="window.generatePDF('winn')" class="bg-brandBlue hover:bg-brandNavy text-white font-bold py-3 px-4 rounded-lg shadow flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-print"></i>
+                            <span>ဌာနဆိုင်ရာဧည့်စာရင်း PDF / Print</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. ACCOUNT PAGE -->
+            <section id="page-account" class="page-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow border border-slate-200 max-w-3xl mx-auto">
+                    <h2 class="text-xl font-bold text-brandNavy mb-4 pb-2 border-b"><i class="fa-solid fa-id-card mr-2 text-brandGold"></i> Staff Profile</h2>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Email:</strong> <span id="profile-email">staff@winnguesthouse.com</span></p>
+                        <p><strong>Role:</strong> <span id="profile-role" class="capitalize font-bold text-brandBlue">Staff</span></p>
+                    </div>
+                    <button onclick="window.logout()" class="mt-6 bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700"><i class="fa-solid fa-power-off mr-1"></i> Log Out</button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL DIALOG FOR EDITING GUEST DETAILS -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
+            <div class="bg-brandNavy text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-brandGold"><i class="fa-solid fa-pen-to-square mr-2"></i> Edit Guest Information</h3>
+                <button onclick="window.closeEditModal()" class="text-white hover:text-red-400 text-xl font-bold">&times;</button>
+            </div>
+            <form id="edit-guest-form" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <input type="hidden" id="modal-edit-id">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ဧည့်သည်အမည်</label>
+                    <input type="text" id="modal-edit-name" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">အဘအမည်</label>
+                    <input type="text" id="modal-edit-father" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">အသက်</label>
+                    <input type="number" id="modal-edit-age" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">မှတ်ပုံတင်အမှတ်</label>
+                    <input type="text" id="modal-edit-nrc" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">လူမျိုး</label>
+                    <input type="text" id="modal-edit-race" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ဘာသာ</label>
+                    <input type="text" id="modal-edit-religion" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">အလုပ်အကိုင်</label>
+                    <input type="text" id="modal-edit-occupation" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">အခန်းနံပါတ်</label>
+                    <select id="modal-edit-room" required class="w-full px-3 py-2 border rounded"></select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block font-bold text-slate-700 mb-1">နေရပ်လိပ်စာအပြည့်အစုံ</label>
+                    <input type="text" id="modal-edit-address" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block font-bold text-slate-700 mb-1">လာရောက်သည့်နေရာ</label>
+                    <input type="text" id="modal-edit-from-place" class="w-full px-3 py-2 border rounded">
+                </div>
+                <div class="md:col-span-2 text-right mt-4 space-x-2">
+                    <button type="button" onclick="window.closeEditModal()" class="px-4 py-2 bg-slate-300 text-slate-800 rounded font-bold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brandBlue text-white rounded font-bold hover:bg-brandNavy">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HIDDEN PRINT CONTAINER FOR PDF GENERATION -->
+    <div id="pdf-container" class="hidden bg-white text-black text-xs" style="font-family: 'Pyidaungsu', sans-serif;"></div>
+
+    <!-- MAIN SCRIPT LOGIC (SUPABASE CLOUD DATABASE MODE) -->
+    <script>
+        // Supabase Configurations
+        const SUPABASE_URL = 'https://wfblokgxxpbdlnvhjmwq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmYmxva2d4eHBiZGxudmhqbXdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwOTg5NTgsImV4cCI6MjEwMTY3NDk1OH0.pb5OXZqBDbQ4LderK78tbdAB0Ng1AbPmOtrwanKObLY';
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const ROOMS = [
+            "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
+            "C-1", "C-3", "C-4", "C-5", "C-6", "C-7", "C-8", "C-10", "C-11", "C-12", "C-13", "C-14", "C-15", "C-16"
+        ];
+
+        let guests = [];
+
+        // Fetch guests from Supabase
+        async function fetchGuests() {
+            try {
+                const { data, error } = await _supabase
+                    .from('guests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                guests = data || [];
+                updateDashboard();
+                renderEditTable();
+                renderGuestList();
+            } catch (err) {
+                console.error("Error fetching guests:", err.message);
+            }
+        }
+
+        // Realtime Subscription Setup
+        function setupRealtime() {
+            _supabase
+                .channel('public:guests')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'guests' }, payload => {
+                    fetchGuests();
+                })
+                .subscribe();
+        }
+
+        function updateDashboard() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeGuests = guests.filter(g => g.status === 'Active');
+            
+            const totalEl = document.getElementById('stat-total-guests');
+            if(totalEl) totalEl.innerText = activeGuests.length;
+            
+            const checkinEl = document.getElementById('stat-checkin-guests');
+            if(checkinEl) checkinEl.innerText = guests.filter(g => g.checkin && g.checkin.startsWith(todayStr)).length;
+            
+            const checkoutEl = document.getElementById('stat-checkout-guests');
+            if(checkoutEl) checkoutEl.innerText = guests.filter(g => g.checkout && g.checkout.startsWith(todayStr)).length;
+
+            const occupiedRooms = [...new Set(activeGuests.map(g => g.room))];
+            const occRoomsEl = document.getElementById('stat-occupied-rooms');
+            if(occRoomsEl) occRoomsEl.innerText = `${occupiedRooms.length} / 24`;
+
+            const roomGrid = document.getElementById('room-grid');
+            if(!roomGrid) return;
+            roomGrid.innerHTML = '';
+            ROOMS.forEach(r => {
+                const isOccupied = occupiedRooms.includes(r);
+                roomGrid.innerHTML += `
+                    <div class="p-3 rounded-lg text-center border ${isOccupied ? 'bg-red-50 border-red-300 text-red-700' : 'bg-emerald-50 border-emerald-300 text-emerald-700'}">
+                        <span class="text-xs block font-bold">ROOM</span>
+                        <span class="text-lg font-extrabold">${r}</span>
+                        <span class="text-[10px] block font-semibold mt-1">${isOccupied ? '● Occupied' : '○ Available'}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderEditTable() {
+            const tbody = document.getElementById('edit-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const nowIso = new Date().toISOString().slice(0,16);
+
+            guests.forEach(g => {
+                const defaultCheckoutTime = g.checkout ? g.checkout : nowIso;
+                const isCheckedOut = g.status === 'Checked Out';
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 border font-bold text-brandBlue">${g.room || '-'}</td>
+                        <td class="p-2 border font-semibold">${g.name || '-'}</td>
+                        <td class="p-2 border">${g.nrc || '-'}</td>
+                        <td class="p-2 border text-[11px]">${g.checkin ? g.checkin.replace('T', ' ') : '-'}</td>
+                        <td class="p-2 border">
+                            <input type="datetime-local" id="co-time-${g.id}" value="${defaultCheckoutTime}" ${isCheckedOut ? 'disabled' : ''} class="p-1 border rounded text-xs w-full">
+                        </td>
+                        <td class="p-2 border font-bold ${isCheckedOut ? 'text-slate-400' : 'text-emerald-600'}">
+                            ${g.status || 'Active'}
+                        </td>
+                        <td class="p-2 border text-center space-x-1">
+                            <button onclick="window.openEditModal('${g.id}')" class="px-2 py-1 bg-amber-500 text-white rounded font-bold text-[10px] hover:bg-amber-600">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                            ${!isCheckedOut ? `
+                                <button onclick="window.checkoutGuest('${g.id}')" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px] hover:bg-red-700">
+                                    <i class="fa-solid fa-right-from-bracket"></i> Check-Out
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderGuestList() {
+            const tbody = document.getElementById('guest-list-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            guests.forEach((g, idx) => {
+                const isCheckedOut = g.status === 'Checked Out';
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 border text-center">${idx + 1}</td>
+                        <td class="p-2 border font-bold text-brandBlue">${g.name || '-'}</td>
+                        <td class="p-2 border">${g.father || '-'}</td>
+                        <td class="p-2 border text-center">${g.age || '-'}</td>
+                        <td class="p-2 border">${g.nrc || '-'}</td>
+                        <td class="p-2 border font-bold">${g.room || '-'}</td>
+                        <td class="p-2 border">${g.address || '-'}</td>
+                        <td class="p-2 border text-[10px]">${g.checkin ? g.checkin.replace('T', ' ') : '-'}</td>
+                        <td class="p-2 border text-[10px]">${g.checkout ? g.checkout.replace('T', ' ') : '-'}</td>
+                        <td class="p-2 border font-bold ${isCheckedOut ? 'text-red-500' : 'text-emerald-600'}">
+                            ${g.status || 'Active'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // FORM SUBMISSION LISTENERS
+        document.getElementById('guest-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const newGuest = {
+                name: document.getElementById('g-name').value,
+                father: document.getElementById('g-father').value,
+                age: document.getElementById('g-age').value,
+                gender: document.getElementById('g-gender').value,
+                nrc: document.getElementById('g-nrc').value,
+                race: document.getElementById('g-race').value,
+                religion: document.getElementById('g-religion').value,
+                room: document.getElementById('g-room').value,
+                address: document.getElementById('g-address').value,
+                checkin: document.getElementById('g-checkin').value,
+                occupation: document.getElementById('g-occupation').value,
+                from_place: document.getElementById('g-from-place').value,
+                remark: document.getElementById('g-remark').value,
+                checkout: '',
+                status: 'Active'
+            };
+
+            const { error } = await _supabase.from('guests').insert([newGuest]);
+
+            if (error) {
+                alert("ဒေတာ သိမ်းဆည်းရာတွင် အမှားအယွင်းရှိပါသည်: " + error.message);
+            } else {
+                alert('အချက်အလက်များကို Supabase တွင် သိမ်းဆည်းပြီးပါပြီ!');
+                document.getElementById('guest-form').reset();
+                
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('g-checkin').value = now.toISOString().slice(0, 16);
+
+                await fetchGuests();
+                window.showPage('list');
+            }
+        });
+
+        document.getElementById('edit-guest-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('modal-edit-id').value;
+
+            const updatedData = {
+                name: document.getElementById('modal-edit-name').value,
+                father: document.getElementById('modal-edit-father').value,
+                age: document.getElementById('modal-edit-age').value,
+                nrc: document.getElementById('modal-edit-nrc').value,
+                race: document.getElementById('modal-edit-race').value,
+                religion: document.getElementById('modal-edit-religion').value,
+                occupation: document.getElementById('modal-edit-occupation').value,
+                room: document.getElementById('modal-edit-room').value,
+                address: document.getElementById('modal-edit-address').value,
+                from_place: document.getElementById('modal-edit-from-place').value
+            };
+
+            const { error } = await _supabase
+                .from('guests')
+                .update(updatedData)
+                .eq('id', id);
+
+            if (error) {
+                alert("ပြင်ဆင်ရာတွင် အမှားအယွင်းရှိပါသည်: " + error.message);
+            } else {
+                window.closeEditModal();
+                alert('အချက်အလက် ပြင်ဆင်ပြီးပါပြီ!');
+                await fetchGuests();
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const code = document.getElementById('login-code').value;
+            const role = document.getElementById('login-role').value;
+
+            if (code === 'WGLM2026') {
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('user-badge').innerText = role.toUpperCase();
+                document.getElementById('profile-email').innerText = email;
+                document.getElementById('profile-role').innerText = role;
+
+                populateRooms();
+                fetchGuests();
+                setupRealtime();
+                
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('g-checkin').value = now.toISOString().slice(0, 16);
+
+                window.showPage('home');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        // GLOBAL NAVIGATION & UI HELPER FUNCTIONS
+        window.logout = function() {
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+        };
+
+        window.showPage = function(pageId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            if (pageId === 'home') updateDashboard();
+            if (pageId === 'edit') renderEditTable();
+            if (pageId === 'list') renderGuestList();
+        };
+
+        function populateRooms() {
+            const select = document.getElementById('g-room');
+            const modalSelect = document.getElementById('modal-edit-room');
+            if(select) select.innerHTML = '';
+            if(modalSelect) modalSelect.innerHTML = '';
+            ROOMS.forEach(r => {
+                const opt = `<option value="${r}">Room ${r}</option>`;
+                if(select) select.innerHTML += opt;
+                if(modalSelect) modalSelect.innerHTML += opt;
+            });
+        }
+
+        window.openEditModal = function(id) {
+            const g = guests.find(item => String(item.id) === String(id));
+            if (!g) return;
+
+            document.getElementById('modal-edit-id').value = g.id;
+            document.getElementById('modal-edit-name').value = g.name || '';
+            document.getElementById('modal-edit-father').value = g.father || '';
+            document.getElementById('modal-edit-age').value = g.age || '';
+            document.getElementById('modal-edit-nrc').value = g.nrc || '';
+            document.getElementById('modal-edit-race').value = g.race || '';
+            document.getElementById('modal-edit-religion').value = g.religion || '';
+            document.getElementById('modal-edit-occupation').value = g.occupation || '';
+            document.getElementById('modal-edit-room').value = g.room || ROOMS[0];
+            document.getElementById('modal-edit-address').value = g.address || '';
+            document.getElementById('modal-edit-from-place').value = g.from_place || '';
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        };
+
+        window.checkoutGuest = async function(id) {
+            const checkoutInput = document.getElementById(`co-time-${id}`);
+            const checkoutVal = checkoutInput ? checkoutInput.value : new Date().toISOString().slice(0,16);
+
+            if (confirm("ဧည့်သည်ကို Check-Out ပြုလုပ်ရန် သေချာပါသလား?")) {
+                const { error } = await _supabase
+                    .from('guests')
+                    .update({ checkout: checkoutVal, status: 'Checked Out' })
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Check-out ပြုလုပ်ရာတွင် အမှားအယွင်းရှိပါသည်: " + error.message);
+                } else {
+                    alert('Check-out ပြုလုပ်ပြီးပါပြီ!');
+                    await fetchGuests();
+                }
+            }
+        };
+
+        window.filterGuests = function() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#guest-list-body tr');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        };
+
+        window.generatePDF = function(type) {
+            const container = document.getElementById('pdf-container');
+            container.classList.remove('hidden');
+            
+            const todayStr = new Date().toLocaleDateString('my-MM', { year: 'numeric', month: 'long', day: 'numeric' });
+            const todayIso = new Date().toISOString().split('T')[0];
+            const activeToday = guests.filter(g => g.status === 'Active' || (g.checkin && g.checkin.startsWith(todayIso)));
+
+            if (type === 'police') {
+                let rowsHtml = '';
+                const displayData = [...activeToday];
+                while (displayData.length < 20) displayData.push(null);
+
+                displayData.forEach((g, idx) => {
+                    rowsHtml += `
+                        <tr style="height: 28px;">
+                            <td style="border: 1px solid #000; text-align: center; font-size: 11px;">${g ? idx + 1 : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.name : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.age : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.father : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? (g.race || '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? (g.religion || '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.occupation : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.nrc : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? g.address : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') + ' / ' + (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 11px;">${g ? 'Room ' + g.room : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.remark || '') : ''}</td>
+                        </tr>
+                    `;
+                });
+
+                container.innerHTML = `
+                    <div style="font-family: 'Pyidaungsu', sans-serif; color: #000; padding: 10px;">
+                        <div style="text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 12px;">
+                            မြို့နယ်ရဲတပ်ဖွဲ့၊ ဒိုက်ဦးမြို့နယ်အတွင်းတည်းခိုခန်းများတွင် လာရောက်တည်းခိုသည့် ဧည့်သည်များစာရင်း
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 8px;">
+                            <div>ရက်စွဲ - ${todayStr}</div>
+                            <div>ဝင်း တည်းခိုခန်း၊ ဖုန်း-၀၉ ၂၅၂၅၅၇၇၇၄</div>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa; font-size: 12px; font-weight: bold; text-align: center;">
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 30px;">စဉ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 120px;">အမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 45px;">အသက်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 110px;">အဘအမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 50px;">လူမျိုး</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 50px;">ဘာသာ</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 85px;">အလုပ်အကိုင်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 140px;">မှတ်ပုံတင်အမှတ်(ထောက်ခံစာ)</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 180px; line-height: 1.2;">နေရပ်လိပ်စာအပြည့်အစုံ</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 120px;">တည်းခိုမည့်နေ့ရက်အချိန် မှ/ထိ</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 60px; line-height: 1.2;">အခန်းအမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 60px;">မှတ်ချက်</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rowsHtml}</tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                let rowsHtml = '';
+                const displayData = [...activeToday];
+                while (displayData.length < 18) displayData.push(null);
+
+                displayData.forEach((g, idx) => {
+                    rowsHtml += `
+                        <tr style="height: 30px;">
+                            <td style="border: 1px solid #000; text-align: center; font-size: 11px;">${g ? idx + 1 : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.name : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.father : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.age : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.occupation : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 11px;">${g ? g.nrc : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px; text-align: center;">${g ? 'Room ' + g.room : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? g.address : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.from_place || '') : ''}</td>
+                        </tr>
+                    `;
+                });
+
+                container.innerHTML = `
+                    <div style="font-family: 'Pyidaungsu', sans-serif; color: #000; padding: 10px;">
+                        <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 6px;">
+                            ပြည်တွင်းဧည့်သည်များရောက်ရှိတည်းခိုစဉ်ဖြည့်စွက်ရမည့်ပုံစံ
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold;">
+                            <div>ရက်စွဲ - ${todayStr}</div>
+                            <div>ဝင်း တည်းခိုခန်း၊ ဧည့်စာရင်းမှတ်တမ်း</div>
+                        </div>
+                        <div style="text-align: right; font-size: 11px; font-weight: bold;">ဒဂုံမန်းလမ်း၊ ဒရယ်မီးလမ်းဆုံအနီး၊ ဒိုက်ဦးမြို့</div>
+                        <div style="text-align: right; font-size: 11px; font-weight: bold; margin-bottom: 4px;">Ph: 09 252557774</div>
+                        <div style="text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 10px;">မန်နေဂျာအမည်-ဦးငြိမ်းချမ်း</div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa; font-size: 11px; font-weight: bold; text-align: center;">
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 34px;">စဉ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 120px;">တည်းခိုသူအမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 110px;">(ဘ)အမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 45px;">အသက်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 100px;">လက်ရှိအလုပ်အကိုင်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 140px;">မှတ်ပုံတင်အမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 55px; line-height: 1.2;">အခန်းအမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 180px;">အမြဲလိပ်စာ</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 90px; line-height: 1.2;">စတည်းသည့် နေ့(အချိန်)</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 90px; line-height: 1.2;">ပြန်လည်ထွက်ခွာ သည့်နေ့(အချိန်)</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 80px; line-height: 1.2;">လာရောက်သည့် ဒေသ</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rowsHtml}</tbody>
+                        </table>
+                        <div style="text-align: right; font-size: 11px; font-weight: bold; margin-top: 25px; padding-right: 30px;">(မန်နေဂျာ)</div>
+                    </div>
+                `;
+            }
+
+            const opt = {
+                margin:       [0.3, 0.3, 0.3, 0.3],
+                filename:     `WINN_Guest_List_${type}_${todayIso}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'legal', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(container).save().then(() => {
+                container.classList.add('hidden');
+            });
+        };
+    </script>
+</body>
+</html>
