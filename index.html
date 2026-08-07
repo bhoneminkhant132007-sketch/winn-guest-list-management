@@ -63,7 +63,7 @@
                         <option value="admin">Admin Manager</option>
                     </select>
                 </div>
-                <p id="login-error" class="text-red-500 text-xs hidden">Security Code မှားယွင်းနေပါသည်။ (Default: WGLM2026)</p>
+                <p id="login-error" class="text-red-500 text-xs hidden">Security Code မှားယွင်းနေပါသည်။ (Staff: WGLM2026 / Admin: WGLM1977)</p>
                 <button type="submit" class="w-full bg-brandNavy hover:bg-brandBlue text-brandGold font-bold py-2.5 rounded-lg border border-brandGold transition duration-200">
                     <i class="fa-solid fa-right-to-bracket mr-2"></i> Log In
                 </button>
@@ -108,7 +108,31 @@
         </nav>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+        <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+            <!-- ADMIN ONLY SECTION: Active Staff & Activity Logs -->
+            <div id="admin-tools-section" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Active Online Staff -->
+                <div class="bg-white p-4 rounded-xl shadow border border-slate-200">
+                    <h3 class="font-bold text-sm text-brandNavy mb-3 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                        လက်ရှိ Online ဝင်ရောက်နေသူများ (Active Staffs)
+                    </h3>
+                    <ul id="online-users-list" class="space-y-2 text-xs divide-y divide-slate-100">
+                        <li class="text-slate-400 py-1">စောင့်ဆိုင်းနေသည်...</li>
+                    </ul>
+                </div>
+
+                <!-- Activity Logs Summary -->
+                <div class="bg-white p-4 rounded-xl shadow border border-slate-200">
+                    <h3 class="font-bold text-sm text-brandNavy mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brandGold"></i> လုပ်ဆောင်ချက် မှတ်တမ်းများ (Recent Activity Logs)
+                    </h3>
+                    <div id="activity-logs-container" class="max-h-40 overflow-y-auto space-y-2 text-xs divide-y divide-slate-100">
+                        <p class="text-slate-400">မှတ်တမ်းမရှိသေးပါ...</p>
+                    </div>
+                </div>
+            </div>
 
             <!-- 1. HOME PAGE -->
             <section id="page-home" class="page-content space-y-6">
@@ -369,6 +393,8 @@
         ];
 
         let guests = [];
+        let currentUserEmail = '';
+        let currentUserRole = '';
 
         // Fetch guests from Supabase
         async function fetchGuests() {
@@ -398,6 +424,125 @@
                 })
                 .subscribe();
         }
+
+        // --- Active Staff Presence & Activity Logs Features ---
+        function trackPresence(email, role) {
+            currentUserEmail = email;
+            currentUserRole = role;
+
+            if (role === 'admin') {
+                const adminTools = document.getElementById('admin-tools-section');
+                if (adminTools) adminTools.classList.remove('hidden');
+            }
+
+            const room = _supabase.channel('online-staffs', {
+                config: {
+                    presence: {
+                        key: email,
+                    },
+                },
+            });
+
+            room.on('presence', { event: 'sync' }, () => {
+                const state = room.presenceState();
+                updateOnlineUsersUI(state);
+            });
+
+            room.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await room.track({
+                        email: email,
+                        role: role,
+                        online_at: new Date().toISOString()
+                    });
+                }
+            });
+        }
+
+        function updateOnlineUsersUI(state) {
+            const container = document.getElementById('online-users-list');
+            if (!container) return;
+
+            container.innerHTML = '';
+            const onlineEmails = Object.keys(state);
+
+            if (onlineEmails.length === 0) {
+                container.innerHTML = '<li class="text-slate-400 py-1">မည်သူမျှ Online မရှိပါ...</li>';
+                return;
+            }
+
+            onlineEmails.forEach(key => {
+                const userDetails = state[key][0];
+                const li = document.createElement('li');
+                li.className = 'py-1.5 flex justify-between items-center';
+                li.innerHTML = `
+                    <span class="font-medium text-slate-800">${userDetails.email}</span>
+                    <span class="px-2 py-0.5 text-[10px] rounded-full font-bold ${userDetails.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">
+                        ${userDetails.role.toUpperCase()}
+                    </span>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        async function logActivity(actionType, details) {
+            if (!currentUserEmail) return;
+
+            try {
+                await _supabase
+                    .from('activity_logs')
+                    .insert([
+                        {
+                            user_email: currentUserEmail,
+                            user_role: currentUserRole,
+                            action_type: actionType,
+                            details: details
+                        }
+                    ]);
+                if (currentUserRole === 'admin') {
+                    fetchActivityLogs();
+                }
+            } catch (err) {
+                console.error('Error logging activity:', err);
+            }
+        }
+
+        async function fetchActivityLogs() {
+            const container = document.getElementById('activity-logs-container');
+            if (!container) return;
+
+            const { data, error } = await _supabase
+                .from('activity_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (error) {
+                console.error('Logs fetch error:', error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p class="text-slate-400">မှတ်တမ်းမရှိသေးပါ...</p>';
+                return;
+            }
+
+            container.innerHTML = data.map(log => {
+                const time = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="py-1.5 flex flex-col gap-0.5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-slate-700">${log.user_email} (${log.user_role})</span>
+                            <span class="text-[10px] text-slate-400">${time}</span>
+                        </div>
+                        <div class="text-slate-600">
+                            <span class="font-medium text-indigo-600">[${log.action_type}]</span> ${log.details}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        // ----------------------------------------------------
 
         function updateDashboard() {
             const todayStr = new Date().toISOString().split('T')[0];
@@ -520,6 +665,7 @@
             if (error) {
                 alert("ဒေတာ သိမ်းဆည်းရာတွင် အမှားအယွင်းရှိပါသည်: " + error.message);
             } else {
+                logActivity('ADD_GUEST', `အခန်း ${newGuest.room} တွင် ဧည့်သည် ${newGuest.name} ကို စာရင်းသွင်းခဲ့သည်`);
                 alert('အချက်အလက်များကို Supabase တွင် သိမ်းဆည်းပြီးပါပြီ!');
                 document.getElementById('guest-form').reset();
                 
@@ -557,46 +703,53 @@
             if (error) {
                 alert("ပြင်ဆင်ရာတွင် အမှားအယွင်းရှိပါသည်: " + error.message);
             } else {
+                logActivity('EDIT_GUEST', `ဧည့်သည် ${updatedData.name} (အခန်း ${updatedData.room}) ၏ အချက်အလက်များကို ပြင်ဆင်ခဲ့သည်`);
                 window.closeEditModal();
                 alert('အချက်အလက် ပြင်ဆင်ပြီးပါပြီ!');
                 await fetchGuests();
             }
         });
 
-      document.getElementById('login-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const code = document.getElementById('login-code').value.trim();
-    const role = document.getElementById('login-role').value;
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const code = document.getElementById('login-code').value.trim();
+            const role = document.getElementById('login-role').value;
 
-    // Staff အတွက် WGLM2026 နှင့် Admin Manager အတွက် WGLM1977 စစ်ဆေးခြင်း
-    const isValidStaff = (role === 'staff' && code === 'WGLM2026');
-    const isValidAdmin = (role === 'admin' && code === 'WGLM1977');
+            // Staff အတွက် WGLM2026 နှင့် Admin Manager အတွက် WGLM1977 စစ်ဆေးခြင်း
+            const isValidStaff = (role === 'staff' && code === 'WGLM2026');
+            const isValidAdmin = (role === 'admin' && code === 'WGLM1977');
 
-    if (isValidStaff || isValidAdmin) {
-        document.getElementById('login-error').classList.add('hidden');
-        document.getElementById('login-page').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('user-badge').innerText = role === 'admin' ? 'ADMIN MANAGER' : 'STAFF';
-        document.getElementById('profile-email').innerText = email;
-        document.getElementById('profile-role').innerText = role === 'admin' ? 'Admin Manager' : 'Staff';
+            if (isValidStaff || isValidAdmin) {
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('user-badge').innerText = role === 'admin' ? 'ADMIN MANAGER' : 'STAFF';
+                document.getElementById('profile-email').innerText = email;
+                document.getElementById('profile-role').innerText = role === 'admin' ? 'Admin Manager' : 'Staff';
 
-        populateRooms();
-        fetchGuests();
-        setupRealtime();
-        
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('g-checkin').value = now.toISOString().slice(0, 16);
+                populateRooms();
+                fetchGuests();
+                setupRealtime();
 
-        window.showPage('home');
-    } else {
-        document.getElementById('login-error').classList.remove('hidden');
-    }
-});
+                // Presence Tracking & Login Logging
+                trackPresence(email, role);
+                logActivity('LOGIN', `${role.toUpperCase()} အဖြစ် စနစ်အတွင်း ဝင်ရောက်ခဲ့သည်`);
+                if (role === 'admin') fetchActivityLogs();
+                
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('g-checkin').value = now.toISOString().slice(0, 16);
+
+                window.showPage('home');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
 
         // GLOBAL NAVIGATION & UI HELPER FUNCTIONS
         window.logout = function() {
+            logActivity('LOGOUT', `စနစ်အတွင်းမှ ထွက်ခွာခဲ့သည်`);
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('login-page').classList.remove('hidden');
         };
@@ -647,6 +800,7 @@
         window.checkoutGuest = async function(id) {
             const checkoutInput = document.getElementById(`co-time-${id}`);
             const checkoutVal = checkoutInput ? checkoutInput.value : new Date().toISOString().slice(0,16);
+            const guestObj = guests.find(g => String(g.id) === String(id));
 
             if (confirm("ဧည့်သည်ကို Check-Out ပြုလုပ်ရန် သေချာပါသလား?")) {
                 const { error } = await _supabase
@@ -657,6 +811,7 @@
                 if (error) {
                     alert("Check-out ပြုလုပ်ရာတွင် အမှားအယွင်းရှိပါသည်: " + error.message);
                 } else {
+                    logActivity('CHECK_OUT', `အခန်း ${guestObj ? guestObj.room : '-'} မှ ဧည့်သည် ${guestObj ? guestObj.name : ''} Check-out ထွက်ခွာခဲ့သည်`);
                     alert('Check-out ပြုလုပ်ပြီးပါပြီ!');
                     await fetchGuests();
                 }
@@ -674,6 +829,7 @@
         };
 
         window.generatePDF = function(type) {
+            logActivity('EXPORT_PDF', `${type === 'police' ? 'ရဲစခန်း' : 'ဌာနဆိုင်ရာ'} ဧည့်စာရင်း PDF Export ထုတ်ယူခဲ့သည်`);
             const container = document.getElementById('pdf-container');
             container.classList.remove('hidden');
             
@@ -804,6 +960,10 @@
             html2pdf().set(opt).from(container).save().then(() => {
                 container.classList.add('hidden');
             });
+        };
+    </script>
+</body>
+</html>
         };
     </script>
 </body>
