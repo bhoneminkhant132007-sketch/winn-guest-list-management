@@ -32,6 +32,16 @@
         body, button, input, select, textarea, table { 
             font-family: 'Pyidaungsu', sans-serif !important; 
         }
+
+        /* PDF စာထပ်ခြင်းမှ ကာကွယ်ရန် ထည့်သွင်းရမည့် CSS */
+        #pdf-container table th, 
+        #pdf-container table td {
+            line-height: 1.5 !important;       /* မြန်မာစာကြောင်းများ အကွာအဝေး ပုံမှန်ဖြစ်စေရန် */
+            padding: 4px 3px !important;       /* အပေါ်အောက် စာတိုက်မနေစေရန် */
+            height: auto !important;           /* Row အမြင့်ကို စာဆန့်သလို အလိုအလျောက် ကျယ်ပေးရန် */
+            vertical-align: middle !important; /* စာသားများကို အလယ်ညှိရန် */
+            word-break: break-word !important; /* စာကြောင်းရှည်လျှင် အောက်လိုင်းသို့ ဆင်းစေရန် */
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
@@ -881,7 +891,7 @@
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 50px;">ဘာသာ</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 85px;">အလုပ်အကိုင်</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 140px;">မှတ်ပုံတင်အမှတ်(ထောက်ခံစာ)</th>
-                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 180px; line-height: 1.2;">နေရပ်လိပ်စာအပြည့်အစုံ</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 180px;">နေရပ်လိပ်စာအပြည့်အစုံ</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 120px;">တည်းခိုမည့်နေ့ရက်အချိန် မှ/ထိ</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 60px; line-height: 1.2;">အခန်းအမှတ်</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 60px;">မှတ်ချက်</th>
@@ -935,11 +945,11 @@
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 45px;">အသက်</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 100px;">လက်ရှိအလုပ်အကိုင်</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 140px;">မှတ်ပုံတင်အမှတ်</th>
-                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 55px; line-height: 1.2;">အခန်းအမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 55px;">အခန်းအမှတ်</th>
                                     <th style="border: 1px solid #000; padding: 4px 2px; width: 180px;">အမြဲလိပ်စာ</th>
-                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 90px; line-height: 1.2;">စတည်းသည့် နေ့(အချိန်)</th>
-                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 90px; line-height: 1.2;">ပြန်လည်ထွက်ခွာ သည့်နေ့(အချိန်)</th>
-                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 80px; line-height: 1.2;">လာရောက်သည့် ဒေသ</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 90px;">စတည်းသည့် နေ့(အချိန်)</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 90px;">ပြန်လည်ထွက်ခွာ သည့်နေ့(အချိန်)</th>
+                                    <th style="border: 1px solid #000; padding: 4px 2px; width: 80px;">လာရောက်သည့် ဒေသ</th>
                                 </tr>
                             </thead>
                             <tbody>${rowsHtml}</tbody>
