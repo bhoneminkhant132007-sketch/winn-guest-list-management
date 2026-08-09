@@ -874,7 +874,7 @@
                             <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.occupation : ''}</td>
                             <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.nrc : ''}</td>
                             <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.address : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') + ' / ' + (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') + ' / ' + (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
                             <td style="border: 1px solid #000; text-align: center; font-size: 15px;">${g ? g.room : ''}</td>
                             <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.remark || '') : ''}</td>
                         </tr>
@@ -883,7 +883,7 @@
 
                 container.innerHTML = `
                     <div style="font-family: 'Pyidaungsu', sans-serif; color: #000; padding: 10px;">
-                        <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 12px;">
+                        <div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 12px;">
                             မြို့နယ်ရဲတပ်ဖွဲ့၊ ဒိုက်ဦးမြို့နယ်အတွင်းတည်းခိုခန်းများတွင် လာရောက်တည်းခိုသည့် ဧည့်သည်များစာရင်း
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; margin-bottom: 8px;">
@@ -892,19 +892,19 @@
                         </div>
                         <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                             <thead>
-                                <tr style="font-size: 14px; font-weight: bold; text-align: center;">
-                                    <th style="border: 1px solid #000; padding: 4px; width: 30px;">စဉ်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 90px;">အမည်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; font-size: 13px; width: 50px;">အသက်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 90px;">အဘအမည်</th>
+                                <tr style="font-size: 15px; font-weight: bold; text-align: center;">
+                                    <th style="border: 1px solid #000; padding: 4px; width: 40px;">စဉ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 125px;">အမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; font-size: 14px; width: 56px;">အသက်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 120px;">အဘအမည်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">လူမျိုး</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">ဘာသာ</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 80px;">အလုပ်အကိုင်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 135px; word-break: break-word;">မှတ်ပုံတင်အမှတ်<br>(ထောက်ခံစာ)</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 90px;">အလုပ်အကိုင်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 150px; word-break: break-word;">မှတ်ပုံတင်အမှတ်<br>(ထောက်ခံစာ)</th>
                                     <th style="border: 1px solid #000; padding: 4px; word-break: break-word;">နေရပ်လိပ်စာအပြည့်အစုံ</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 90px; line-height: 1.2;">တည်းခိုမည့်နေ့<br>ရက်အချိန် မှ / ထိ</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 45px;">အခန်း<br>အမှတ်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 60px;">မှတ်ချက်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 120px; line-height: 1.2;">တည်းခိုမည့်နေ့<br>ရက်အချိန် မှ / ထိ</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 65px;">အခန်း<br>အမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; font-size: 12px; width: 45px;">မှတ်ချက်</th>
                                 </tr>
                             </thead>
                             <tbody>${rowsHtml}</tbody>
