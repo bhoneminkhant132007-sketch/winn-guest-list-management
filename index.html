@@ -865,18 +865,18 @@
                 displayData.forEach((g, idx) => {
                     rowsHtml += `
                         <tr style="height: 26px;">
-                            <td style="border: 1px solid #000; text-align: center; font-size: 10px;">${g ? idx + 1 : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? g.name : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px; text-align: center;">${g ? g.age : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? g.father : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.race || '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? (g.religion || '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? g.occupation : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 10px;">${g ? g.nrc : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 9px;">${g ? g.address : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 9px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') + ' / ' + (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
-                            <td style="border: 1px solid #000; text-align: center; font-size: 10px;">${g ? g.room : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 9px;">${g ? (g.remark || '') : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 13px;">${g ? idx + 1 : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.name : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px; text-align: center;">${g ? g.age : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.father : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.race || '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.religion || '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.occupation : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.nrc : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.address : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') + ' / ' + (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 13px;">${g ? g.room : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.remark || '') : ''}</td>
                         </tr>
                     `;
                 });
@@ -895,7 +895,7 @@
                                 <tr style="font-size: 14px; font-weight: bold; text-align: center;">
                                     <th style="border: 1px solid #000; padding: 4px; width: 30px;">စဉ်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 90px;">အမည်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 40px;">အသက်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; font-size: 12px; width: 40px;">အသက်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 90px;">အဘအမည်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">လူမျိုး</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">ဘာသာ</th>
@@ -919,17 +919,17 @@
                 displayData.forEach((g, idx) => {
                     rowsHtml += `
                         <tr style="height: 26px;">
-                            <td style="border: 1px solid #000; text-align: center; font-size: 14px;">${g ? idx + 1 : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 14px;">${g ? g.name : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 14px;">${g ? g.father : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 14px; text-align: center;">${g ? g.age : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 14px;">${g ? g.occupation : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 14px;">${g ? g.nrc : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 14px; text-align: center;">${g ? g.room : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.address : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.from_place || '') : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 16px;">${g ? idx + 1 : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? g.name : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? g.father : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px; text-align: center;">${g ? g.age : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? g.occupation : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? g.nrc : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px; text-align: center;">${g ? g.room : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? g.address : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 16px;">${g ? (g.from_place || '') : ''}</td>
                         </tr>
                     `;
                 });
@@ -939,16 +939,16 @@
                         <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 6px;">
                             ပြည်တွင်းဧည့်သည်များရောက်ရှိတည်းခိုစဉ်ဖြည့်စွက်ရမည့်ပုံစံ
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold;">
+                        <div style="display: flex; justify-content: space-between; font-size: 17px; font-weight: bold;">
                             <div>ရက်စွဲ - ${todayStr}</div>
                             <div>ဝင်း တည်းခိုခန်း၊ ဧည့်စာရင်းမှတ်တမ်း</div>
                         </div>
-                        <div style="text-align: right; font-size: 15px; font-weight: bold;">ဒဂုံမန်းလမ်း၊ ဒရယ်မီးလမ်းဆုံအနီး၊ ဒိုက်ဦးမြို့</div>
-                        <div style="text-align: right; font-size: 15px; font-weight: bold; margin-bottom: 4px;">Ph: 09 252557774</div>
-                        <div style="text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 10px;">မန်နေဂျာအမည်-ဦးငြိမ်းချမ်း</div>
+                        <div style="text-align: right; font-size: 17px; font-weight: bold;">ဒဂုံမန်းလမ်း၊ ဒရယ်မီးလမ်းဆုံအနီး၊ ဒိုက်ဦးမြို့</div>
+                        <div style="text-align: right; font-size: 17px; font-weight: bold; margin-bottom: 4px;">Ph: 09 252557774</div>
+                        <div style="text-align: center; font-size: 17px; font-weight: bold; margin-bottom: 10px;">မန်နေဂျာအမည်-ဦးငြိမ်းချမ်း</div>
                         <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
     <thead>
-                                <tr style="font-size: 14px; font-weight: bold; text-align: center;">
+                                <tr style="font-size: 16px; font-weight: bold; text-align: center;">
                                     <th style="border: 1px solid #000; padding: 4px; width: 30px;">စဉ်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 100px;">တည်းခိုသူအမည်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 90px;">(ဘ)အမည်</th>
@@ -964,7 +964,7 @@
                             </thead>
                             <tbody>${rowsHtml}</tbody>
                         </table>
-                        <div style="text-align: right; margin-top: 15px; font-weight: bold; font-size: 15px; margin-right: 20px;">
+                        <div style="text-align: right; margin-top: 15px; font-weight: bold; font-size: 16px; margin-right: 20px;">
                             (မန်နေဂျာ)
                         </div>
                     </div>
