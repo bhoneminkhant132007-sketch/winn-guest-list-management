@@ -973,18 +973,7 @@
                 `;
             }
 
-            const opt = {
-                margin:       [0.75, 0.25, 0.75, 0.25], // Top: 0.75", Bottom: 0.75", Left: 0.25", Right: 0.25"
-                filename:     `WINN_Guest_List_${type}_${todayIso}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-            };
-
-            html2pdf().set(opt).from(container).save().then(() => {
-                container.classList.add('hidden');
-            });
-        };
+        
             const opt = {
                 margin:       [0.3, 0.3, 0.3, 0.3],
                 filename:     `WINN_Guest_List_${type}_${todayIso}.pdf`,
@@ -1000,7 +989,4 @@
     </script>
 </body>
 </html>
-        };
-    </script>
-</body>
-</html>
+      
