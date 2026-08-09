@@ -919,17 +919,17 @@
                 displayData.forEach((g, idx) => {
                     rowsHtml += `
                         <tr style="height: 26px;">
-                            <td style="border: 1px solid #000; text-align: center; font-size: 12px;">${g ? idx + 1 : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? g.name : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? g.father : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px; text-align: center;">${g ? g.age : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? g.occupation : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? g.nrc : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px; text-align: center;">${g ? g.room : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? g.address : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 12px;">${g ? (g.from_place || '') : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 13px;">${g ? idx + 1 : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.name : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.father : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px; text-align: center;">${g ? g.age : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.occupation : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.nrc : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px; text-align: center;">${g ? g.room : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.address : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.from_place || '') : ''}</td>
                         </tr>
                     `;
                 });
@@ -939,7 +939,7 @@
                         <div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 6px;">
                             ပြည်တွင်းဧည့်သည်များရောက်ရှိတည်းခိုစဉ်ဖြည့်စွက်ရမည့်ပုံစံ
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold;">
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;">
                             <div>ရက်စွဲ - ${todayStr}</div>
                             <div>ဝင်း တည်းခိုခန်း၊ ဧည့်စာရင်းမှတ်တမ်း</div>
                         </div>
@@ -949,17 +949,17 @@
                         <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
     <thead>
                                 <tr style="font-size: 13px; font-weight: bold; text-align: center;">
-                                    <th style="border: 1px solid #000; padding: 4px; width: 30px;">စဉ်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 100px;">တည်းခိုသူအမည်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 90px;">(ဘ)အမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 35px;">စဉ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 120px;">တည်းခိုသူအမည်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 115px;">(ဘ)အမည်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">အသက်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 85px;">လက်ရှိ<br>အလုပ်အကိုင်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 130px; word-break: break-word;">မှတ်ပုံတင်အမှတ်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 45px;">အခန်း<br>အမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 180px; word-break: break-word;">မှတ်ပုံတင်အမှတ်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 50px;">အခန်း<br>အမှတ်</th>
                                     <th style="border: 1px solid #000; padding: 4px; word-break: break-word;">အမြဲလိပ်စာ</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 85px; line-height: 1.2;">စတည်းသည့်<br>နေ့(အချိန်)</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 85px; font-size: 9px; line-height: 1.2;">ပြန်လည်ထွက်ခွာ<br>သည့်နေ့(အချိန်)</th>
-                                    <th style="border: 1px solid #000; padding: 4px; width: 70px; font-size: 9px;">လာရောက်<br>သည့်ဒေသ</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 90px; line-height: 1.2;">စတည်းသည့်<br>နေ့(အချိန်)</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 85px; font-size: 11px; line-height: 1.2;">ပြန်လည်ထွက်ခွာ<br>သည့်နေ့(အချိန်)</th>
+                                    <th style="border: 1px solid #000; padding: 4px; width: 70px; font-size: 11px;">လာရောက်<br>သည့်ဒေသ</th>
                                 </tr>
                             </thead>
                             <tbody>${rowsHtml}</tbody>
