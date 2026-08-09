@@ -865,17 +865,17 @@
                 displayData.forEach((g, idx) => {
                     rowsHtml += `
                         <tr style="height: 26px;">
-                            <td style="border: 1px solid #000; text-align: center; font-size: 13px;">${g ? idx + 1 : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.name : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px; text-align: center;">${g ? g.age : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.father : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.race || '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.religion || '') : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.occupation : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.nrc : ''}</td>
-                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? g.address : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 15px;">${g ? idx + 1 : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.name : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px; text-align: center;">${g ? g.age : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.father : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? (g.race || '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? (g.religion || '') : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.occupation : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.nrc : ''}</td>
+                            <td style="border: 1px solid #000; padding: 2px 4px; font-size: 15px;">${g ? g.address : ''}</td>
                             <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.checkin ? g.checkin.replace('T', ' ') : '') + ' / ' + (g.checkout ? g.checkout.replace('T', ' ') : '') : ''}</td>
-                            <td style="border: 1px solid #000; text-align: center; font-size: 13px;">${g ? g.room : ''}</td>
+                            <td style="border: 1px solid #000; text-align: center; font-size: 15px;">${g ? g.room : ''}</td>
                             <td style="border: 1px solid #000; padding: 2px 4px; font-size: 13px;">${g ? (g.remark || '') : ''}</td>
                         </tr>
                     `;
@@ -886,7 +886,7 @@
                         <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 12px;">
                             မြို့နယ်ရဲတပ်ဖွဲ့၊ ဒိုက်ဦးမြို့နယ်အတွင်းတည်းခိုခန်းများတွင် လာရောက်တည်းခိုသည့် ဧည့်သည်များစာရင်း
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; margin-bottom: 8px;">
                             <div>ရက်စွဲ - ${todayStr}</div>
                             <div>ဝင်း တည်းခိုခန်း၊ ဖုန်း-၀၉ ၂၅၂၅၅၇၇၇၄</div>
                         </div>
@@ -895,7 +895,7 @@
                                 <tr style="font-size: 14px; font-weight: bold; text-align: center;">
                                     <th style="border: 1px solid #000; padding: 4px; width: 30px;">စဉ်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 90px;">အမည်</th>
-                                    <th style="border: 1px solid #000; padding: 4px; font-size: 12px; width: 50px;">အသက်</th>
+                                    <th style="border: 1px solid #000; padding: 4px; font-size: 13px; width: 50px;">အသက်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 90px;">အဘအမည်</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">လူမျိုး</th>
                                     <th style="border: 1px solid #000; padding: 4px; width: 50px;">ဘာသာ</th>
